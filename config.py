@@ -1,5 +1,5 @@
 user = 'postgres'
 password = 'Defender02Sync02'
-host = '127.0.0.1'
+host = 'database'
 port = '5432'
 database = 'DB_SNUS'

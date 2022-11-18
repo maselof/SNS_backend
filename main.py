@@ -1,5 +1,5 @@
 import psycopg2
-from flask import Flask, url_for, request, redirect
+from flask import Flask, url_for, request, redirect, send_file
 from config import user, password, host, port, database
 import controller_site
 import os
@@ -10,33 +10,14 @@ connection = psycopg2.connect(user=user,
                               host=host,
                               port=port,
                               database=database)
-UPLOAD_FOLDER = '/resource'
-ALLOWED_EXTENSION = {'.jpg'}
+UPLOAD_FOLDER = 'resource/'
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSION
-
-
-@app.route('/')
-def upload_file():
-    if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file', filename=filename))
-    return """
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form action="" method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=submit value=Upload>
-    </form> 
-    """
+@app.route('/return_file/<filename>')
+def upload_file(filename):
+    file_path = UPLOAD_FOLDER + filename
+    return send_file(file_path, as_attachment=True)
 
 
 @app.route('/reg')
