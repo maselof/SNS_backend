@@ -3,8 +3,6 @@ import requests
 from flask import Flask, url_for, request, redirect, send_file
 from config import user, password, host, port, database
 import controller_site
-import os
-from werkzeug.utils import secure_filename
 
 connection = psycopg2.connect(user=user,
                               password=password,
@@ -13,15 +11,6 @@ connection = psycopg2.connect(user=user,
                               database=database)
 UPLOAD_FOLDER = 'resource/'
 app = Flask(__name__)
-
-
-
-
-
-@app.route('/api/return_file/<filename>')
-def upload_file(filename):
-    file_path = UPLOAD_FOLDER + filename
-    return send_file(file_path, as_attachment=True)
 
 
 @app.route('/api/reg', methods=['POST'])
@@ -35,6 +24,7 @@ def reg():
 def join():
     data = requests.get('bff').json()
     return controller_site.join_user(data.get['username'], data.get['password'])
+
 
 @app.route('/api/playlists')
 def playlists():
