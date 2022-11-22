@@ -1,5 +1,5 @@
 user = 'postgres'
 password = 'Defender02Sync02'
-host = 'localhost'
+host = 'host.docker.internal'
 port = '5432'
-database = 'DB_SNUS'
+database = 'db_snus'
