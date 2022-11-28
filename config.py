@@ -1,5 +1,7 @@
-user = 'postgres'
-password = 'Defender02Sync02'
-host = 'database'
+import os
+
+user = os.environ.get('POSTGRES_USER')
+password = os.environ.get('POSTGRES_PASSWORD')
+host = os.environ.get('POSTGRES_HOST')
 port = '5432'
-database = 'db_snus'
+database = os.environ.get('POSTGRES_DB')
