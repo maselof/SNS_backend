@@ -15,14 +15,14 @@ app = Flask(__name__)
 
 @app.route('/api/reg', methods=['POST'])
 def reg():
-    data = requests.get('bff').json()
+    data = requests.get('http://bff:8080').json()
     return controller_site.registration_users(data.get['username'], data.get['password'],
                                               data.get['email'], data.get['phone'])
 
 
-@app.route('/api/join', methods=['POST'])
+@app.route('/api/auth', methods=['POST'])
 def join():
-    data = requests.get('bff').json()
+    data = requests.get('http://bff:8080').json()
     return controller_site.join_user(data.get['username'], data.get['password'])
 
 
