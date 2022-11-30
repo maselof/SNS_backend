@@ -14,26 +14,6 @@ UPLOAD_FOLDER = 'resource/'
 app = Flask(__name__)
 
 
-@app.route('/')
-def test_json():
-    data = {
-        'username': 'vasya',
-        'password': 'vasya_krutoy',
-        'email': 'vasya@mail.ru',
-        'phone': '911'
-    }
-    return data
-
-
-@app.route('/test')
-def test_auth():
-    data = requests.request('GET', 'http://localhost:5000/api/auth').json()
-    return flask.jsonify({
-        'answer': 'successful',
-        'output': data
-    })
-
-
 @app.route('/api/register', methods=['POST', 'GET'])
 def reg():
     data = request.get_json()
