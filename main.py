@@ -1,3 +1,4 @@
+import flask
 import psycopg2
 import requests
 from flask import Flask, url_for, request, redirect, send_file
@@ -14,7 +15,7 @@ app = Flask(__name__)
 
 
 @app.route('/')
-def test():
+def test_json():
     data = {
         'username': 'vasya',
         'password': 'vasya_krutoy',
@@ -24,6 +25,15 @@ def test():
     return data
 
 
+@app.route('/test')
+def test_auth():
+    data = requests.request('GET', 'http://localhost:5000/api/auth').json()
+    return flask.jsonify({
+        'answer': 'successful',
+        'output': data
+    })
+
+
 @app.route('/api/register', methods=['POST', 'GET'])
 def reg():
     data = requests.request('GET', 'http://bff:8080').json()
@@ -31,9 +41,9 @@ def reg():
                                               data['email'], data['phone'])
 
 
-@app.route('/api/auth', methods=['POST'])
+@app.route('/api/auth', methods=['POST', 'GET'])
 def join():
-    data = requests.get('http://bff:8080').json()
+    data = requests.request('GET', 'http://bff:8080').json()
     return controller_site.join_user(data['username'], data['password'])
 
 
