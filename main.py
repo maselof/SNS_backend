@@ -1,3 +1,5 @@
+import json
+import flask
 import psycopg2
 import requests
 from flask import Flask, url_for, request, redirect, send_file
@@ -13,17 +15,17 @@ UPLOAD_FOLDER = 'resource/'
 app = Flask(__name__)
 
 
-@app.route('/api/reg', methods=['POST'])
+@app.route('/api/register', methods=['POST'])
 def reg():
     data = requests.get('http://bff:8080').json()
-    return controller_site.registration_users(data.get['username'], data.get['password'],
-                                              data.get['email'], data.get['phone'])
+    return controller_site.registration_users(data['username'], data['password'],
+                                              data['email'], data['phone'])
 
 
 @app.route('/api/auth', methods=['POST'])
 def join():
     data = requests.get('http://bff:8080').json()
-    return controller_site.join_user(data.get['username'], data.get['password'])
+    return controller_site.join_user(data['username'], data['password'])
 
 
 @app.route('/api/playlists')
