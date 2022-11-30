@@ -36,14 +36,14 @@ def test_auth():
 
 @app.route('/api/register', methods=['POST', 'GET'])
 def reg():
-    data = requests.request('GET', 'http://bff:8080').json()
+    data = request.get_json()
     return controller_site.registration_users(data['username'], data['password'],
                                               data['email'], data['phone'])
 
 
 @app.route('/api/auth', methods=['POST', 'GET'])
 def join():
-    data = requests.request('GET', 'http://bff:8080').json()
+    data = request.get_json()
     return controller_site.join_user(data['username'], data['password'])
 
 
