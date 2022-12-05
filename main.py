@@ -23,23 +23,26 @@ def reg():
     res = controller_site.registration_users(data['username'], data['password'],
                                              data['email'], data['phone'])
     if res['error']:
-        return make_response('Login is already taken', 400)
+        return Response('Login is already taken', 400)
     elif res['successfully']:
-        return make_response('OK', 200)
+        return Response('OK', 200)
     else:
-        return make_response('Server error', 404)
+        return Response('Server error', 404)
 
 
 @app.route('/api/auth', methods=['POST', 'GET'])
 def join():
     data = request.get_json()
+    # data = dict()
+    # data['username'] = request.args.get('username')
+    # data['password'] = request.args.get('password')
     res = controller_site.join_user(data['username'], data['password'])
-    ACTIVITY_USERS[secrets.token_hex(4)] = data['username']
-    print(ACTIVITY_USERS)
+    generate_token = secrets.token_hex(32)
+    ACTIVITY_USERS[generate_token] = data['username']
     if res['answer'] == 'Password or username entered incorrectly':
         return Response('Incorrect password or username', 403)
     elif res['answer'] == 'The data entered is correct':
-        return Response('The data entered is correct', 200)
+        return Response(generate_token, 200)
     else:
         return Response('Server error', 404)
 
