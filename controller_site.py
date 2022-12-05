@@ -124,24 +124,45 @@ def show_playlist_performer(id_performer):
         })
 
 
-def show_performer_album(performer_name):
+def show_performer_album(id_performer):
     try:
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""
-                SELECT * FROM show_album_performer('{performer_name}');
+                SELECT check_performer({id_performer});
                 """
             )
-            res = list()
+            check = cursor.fetchone()
+            if check[0] == 'THE PERFORMER WAS NOT FOUND':
+                return check[0]
+            res = dict()
+            cursor.execute(
+                f"""
+                SELECT * FROM performer WHERE id_performer = {id_performer}
+                """
+            )
             for data in cursor.fetchall():
-                res.append({
+                res = {
+                    'id_performer': data[0],
+                    'performer_name': data[1],
+                    'followers_count': data[2],
+                    'album': list()
+                }
+            cursor.execute(
+                f"""
+                SELECT * FROM show_album_performer('{id_performer}');
+                """
+            )
+            for data in cursor.fetchall():
+                res['album'].append({
                     'id_album': data[0],
                     'album_name': data[1],
-                    'creator_name': data[2]
+                    'creator_id': data[2],
+                    'songs_count': data[3]
                 })
-            return flask.jsonify(res)
+            return res
     except Exception as ex:
-        return flask.jsonify({
+        return dict({
             'error': ex
         })
 

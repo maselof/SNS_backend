@@ -22,7 +22,7 @@ def reg():
     data = request.get_json()
     res = controller_site.registration_users(data['username'], data['password'],
                                              data['email'], data['phone'])
-    if res['error']:
+    if 'error' in res.keys():
         return Response('Login is already taken', 400)
     elif res['successfully']:
         return Response('OK', 200)
@@ -68,13 +68,19 @@ def performer_playlist(id_performer):
     return controller_site.show_playlist_performer(id_performer)
 
 
-# I did not finish it
-@app.route('/api/<user_token>/albums')
-def performer_album(user_token):
+@app.route('/api/albums')
+def performer_album():
+    user_token = request.headers.get('Authorization')
+    performer_id = request.args.get('performerid')
     if user_token not in ACTIVITY_USERS:
         return Response('Unauthorized', 401)
-    performer_name = request.get_json()
-    res = controller_site.show_performer_album(performer_name['performer_id'])
+    res = controller_site.show_performer_album(performer_id)
+    if res == 'THE PERFORMER WAS NOT FOUND':
+        return Response('THE PERFORMER WAS NOT FOUND', 404)
+    elif 'error' in res.keys():
+        return Response('Server error', 404)
+    else:
+        return Response(json.dumps(res, indent=4), 200, mimetype='application/json')
 
 
 # example for uploading files
