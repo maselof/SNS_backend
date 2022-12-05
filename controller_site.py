@@ -18,14 +18,14 @@ def registration_users(username, user_password, email, phone_number):
                 """
             )
             connection.commit()
-            return flask.jsonify(
+            return dict(
                 {
                     'successfully': f"{username}"
                 }
             )
     except Exception as ex:
         print('[INFO]', ex)
-        return flask.jsonify(
+        return dict(
             {
                 'error': f"{ex}"
             }
@@ -41,13 +41,7 @@ def join_user(username, user_password):
                 """
             )
             res = cursor.fetchone()
-            # cursor.execute(
-            #     f"""
-            #     DELETE FROM users WHERE username = 'Maselof'
-            #     """
-            # )
-            # connection.commit()
-            return flask.jsonify({
+            return dict({
                 'answer': f"{res[0]}"
             })
     except Exception as ex:
@@ -55,16 +49,6 @@ def join_user(username, user_password):
         return flask.jsonify({
             'error': f"{ex}"
         })
-
-
-def return_res_playlist(prev_res, i):
-    if i >= len(prev_res):
-        return
-    return flask.jsonify({
-        'id_playlist': f'{prev_res[i][0]}',
-        'playlist_name': f'{prev_res[i][1]}',
-        'music_count': f'{prev_res[i][2]}'
-    })
 
 
 def show_user_playlist(username):
@@ -82,10 +66,10 @@ def show_user_playlist(username):
                     'name_playlist': data[1],
                     'music_count': data[2]
                 })
-            return flask.jsonify(res)
+            return res
     except Exception as ex:
         print('[INFO]', ex)
-        return flask.jsonify({
+        return dict({
             'error': f"{ex}"
         })
 
@@ -116,7 +100,7 @@ def show_songs_playlist(id_playlist):
             'error': ex
         })
 
-# прописать функцию в pgadmin
+# прописать функцию в postegres
 def show_playlist_performer(id_performer):
     try:
         with connection.cursor() as cursor:
@@ -138,3 +122,27 @@ def show_playlist_performer(id_performer):
         return flask.jsonify({
             'error': ex
         })
+
+
+def show_performer_album(performer_name):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                SELECT * FROM show_album_performer('{performer_name}');
+                """
+            )
+            res = list()
+            for data in cursor.fetchall():
+                res.append({
+                    'id_album': data[0],
+                    'album_name': data[1],
+                    'creator_name': data[2]
+                })
+            return flask.jsonify(res)
+    except Exception as ex:
+        return flask.jsonify({
+            'error': ex
+        })
+
+
