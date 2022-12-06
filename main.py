@@ -47,8 +47,9 @@ def join():
         return Response('Server error', 404)
 
 
-@app.route('/api/<user_token>/playlists', methods=['GET'])
-def playlists(user_token):
+@app.route('/api/playlists', methods=['GET'])
+def playlists():
+    user_token = request.headers.get('Authorization')
     if user_token not in ACTIVITY_USERS:
         return Response('Unauthorized', 401)
     res = controller_site.show_user_playlist(ACTIVITY_USERS[user_token])
@@ -70,7 +71,7 @@ def performer_playlist(id_performer):
 
 @app.route('/api/albums', methods=['GET'])
 def performer_album():
-    user_token = request.args.get('Authorization')
+    user_token = request.headers.get('Authorization')
     performer_id = request.args.get('performerId')
     if user_token not in ACTIVITY_USERS:
         return Response('Unauthorized', 401)
