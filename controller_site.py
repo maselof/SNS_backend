@@ -135,33 +135,31 @@ def show_performer_album(id_performer):
             check = cursor.fetchone()
             if check[0] == 'THE PERFORMER WAS NOT FOUND':
                 return check[0]
-            res = dict()
+            res = list()
             cursor.execute(
                 f"""
                 SELECT * FROM performer WHERE id_performer = {id_performer}
                 """
             )
-            for data in cursor.fetchall():
-                res = {
-                    'id_performer': data[0],
-                    'performer_name': data[1],
-                    'followers_count': data[2],
-                    'album': list()
-                }
+            data_performer = cursor.fetchone()
             cursor.execute(
                 f"""
                 SELECT * FROM show_album_performer('{id_performer}');
                 """
             )
+            print(data_performer)
             for data in cursor.fetchall():
-                res['album'].append({
-                    'id_album': data[0],
-                    'album_name': data[1],
-                    'creator_id': data[2],
-                    'songs_count': data[3]
+                res.append({
+                    'albumId': data[0],
+                    'albumName': data[1],
+                    'performerId': data[2],
+                    'songsCount': data[3],
+                    'performerName': data_performer[1],
+                    'followers': data_performer[2]
                 })
             return res
     except Exception as ex:
+        print(ex)
         return dict({
             'error': ex
         })

@@ -1,7 +1,7 @@
 import json
 
 import psycopg2
-from flask import Flask, request, send_file, make_response, Response
+from flask import Flask, request, send_file, Response
 from config import user, password, host, port, database
 import controller_site
 import secrets
@@ -68,16 +68,16 @@ def performer_playlist(id_performer):
     return controller_site.show_playlist_performer(id_performer)
 
 
-@app.route('/api/albums')
+@app.route('/api/albums', methods=['GET'])
 def performer_album():
-    user_token = request.headers.get('Authorization')
-    performer_id = request.args.get('performerid')
+    user_token = request.args.get('Authorization')
+    performer_id = request.args.get('performerId')
     if user_token not in ACTIVITY_USERS:
         return Response('Unauthorized', 401)
     res = controller_site.show_performer_album(performer_id)
     if res == 'THE PERFORMER WAS NOT FOUND':
         return Response('THE PERFORMER WAS NOT FOUND', 404)
-    elif 'error' in res.keys():
+    elif type(res) == dict:
         return Response('Server error', 404)
     else:
         return Response(json.dumps(res, indent=4), 200, mimetype='application/json')
