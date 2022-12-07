@@ -100,23 +100,28 @@ def show_songs_playlist(id_playlist):
             'error': ex
         })
 
+
 # прописать функцию в postegres
-def show_playlist_performer(id_performer):
+
+def finder_by_word_from_album(word):
     try:
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""
-                SELECT * FROM show_playlist_performer({id_performer});
+                SELECT * FROM search_in_album('{word}'); 
                 """
             )
             res = list()
             for data in cursor.fetchall():
                 res.append({
-                    'id_playlist': data[0],
-                    'name_playlist': data[1],
-                    'music_count': data[2]
+                    'albumId': data[0],
+                    'albumName': data[1],
+                    'performerId': data[2],
+                    'performerName': data[3],
+                    'followers': data[4],
+                    'songsCount': data[5]
                 })
-            return flask.jsonify(res)
+            return res
     except Exception as ex:
         print('[INFO]', ex)
         return flask.jsonify({
@@ -165,3 +170,53 @@ def show_performer_album(id_performer):
         })
 
 
+def finder_by_word_from_performer(word):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                SELECT * FROM search_performer('{word}');
+                """
+            )
+            res = list()
+            for data in cursor.fetchall():
+                res.append({
+                    'performerId': data[0],
+                    'performerName': data[1],
+                    'followers': data[2]
+                })
+            return res
+    except Exception as ex:
+        print(ex)
+        return dict({
+            'error': ex
+        })
+
+
+def finder_by_word_from_song(word):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                SELECT * FROM search_song('{word}');
+                """
+            )
+            res = list()
+            for data in cursor.fetchall():
+                res.append({
+                    'songID': data[0],
+                    'songName': data[1],
+                    'albumId': data[2],
+                    'albumName': data[3],
+                    'performerId': data[4],
+                    'performerName': data[5],
+                    'url': data[6],
+                    'duration': data[7],
+                    'text': data[8]
+                })
+            return res
+    except Exception as ex:
+        print(ex)
+        return dict({
+            'error': ex
+        })

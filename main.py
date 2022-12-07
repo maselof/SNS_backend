@@ -59,14 +59,33 @@ def playlists():
         return Response('Server error', 404)
 
 
-@app.route('/api/<id_playlist>/songs')
-def playlist_songs(id_playlist):
-    return controller_site.show_songs_playlist(id_playlist)
-
-
-@app.route('/api/<id_performer>/creativity')
-def performer_playlist(id_performer):
-    return controller_site.show_playlist_performer(id_performer)
+@app.route('api/find', methods=['GET'])
+def find():
+    type_search = request.headers.get('type')
+    word = request.args.get('word')
+    user_token = request.args.get('Authorization')
+    if user_token not in ACTIVITY_USERS:
+        return Response('Unauthorized', 401)
+    elif word == '':
+        return Response('Bad request', 400)
+    elif type_search == 'album':
+        res = controller_site.finder_by_word_from_album(word)
+        if type(res) == dict:
+            return Response('Bad request', 400)
+        else:
+            return Response(json.dumps(res, indent=4), 200, mimetype='application/json')
+    elif type_search == 'performer':
+        res = controller_site.finder_by_word_from_performer(word)
+        if type(res) == dict:
+            return Response('Bad request', 400)
+        else:
+            return Response(json.dumps(res, indent=4), 200, mimetype='application/json')
+    elif type_search == 'song':
+        res = controller_site.finder_by_word_from_song(word)
+        if type(res) == dict:
+            return Response('Bad request', 400)
+        else:
+            return Response(json.dumps(res, indent=4), 200, mimetype='application/json')
 
 
 @app.route('/api/albums', methods=['GET'])
