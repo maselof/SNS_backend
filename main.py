@@ -1,12 +1,10 @@
 import json
 import os
-import flask
 import psycopg2
 from flask import Flask, request, send_file, Response
 from config import user, password, host, port, database
 import controller_site
 from controller_site import ACTIVITY_USERS
-import secrets
 import requests
 
 connection = psycopg2.connect(user=user,
@@ -24,40 +22,43 @@ def reg():
     data = request.get_json()
     res = controller_site.registration_users(data)
     if 'error' in res.keys():
-        return Response('Login is already taken', 400)
+        if res['error'][0:31] == 'ОШИБКА:  повторяющееся значение':
+            return Response('Login is already taken', 400)
+        else:
+            return Response('Server error', 404)
     elif res['successfully']:
         id_user = res['successfully']
         if not os.path.isdir(f"{UPLOAD_FOLDER}{id_user}"):
             os.mkdir(f"{UPLOAD_FOLDER}{id_user}")
         return Response('OK', 200)
-    else:
-        return Response('Server error', 404)
 
 
 @app.route('/api/auth', methods=['POST', 'GET'])
 def join():
     data = request.get_json()
     res = controller_site.join_user(data['username'], data['password'])
-    print(ACTIVITY_USERS)
     if 'error' in res.keys():
         if res['error'][9:49] == 'Password or username entered incorrectly':
             return Response('Incorrect password or username', 403)
         else:
             return Response('Server error', 404)
     else:
-        return Response(res, 200, mimetype='application/json')
+        return Response(json.dumps(res), 200, mimetype='application/json')
 
 
-@app.route('/api/account/avatar', methods=['POST'])
+@app.route('/api/account/avatar', methods=['POST', 'GET'])
 def change_avatar():
-    avatar_url = 'http://bff:8080/' + request.args.get('avatarUrl')
+    avatar_url = 'http://25.26.173.176:8080/' + request.args.get('avatarUrl')
     user_token = request.headers.get('Authorization')
     if user_token not in ACTIVITY_USERS.keys():
         return Response('Unauthorized', 401)
     res = controller_site.change_avatar_user(ACTIVITY_USERS[user_token])
     if 'successfully' in res.keys():
-        open(f"data/{res['successfully']}/img.png", 'wb').write(requests.get(avatar_url).content)
-        return Response('OK', 200)
+        r = requests.get(avatar_url)
+        print(avatar_url)
+        with open(f"data/{res['successfully']}/img.png", 'wb') as f:
+            f.write(r.content)
+        return Response(f"data/{res['successfully']}/img.png", 200)
     else:
         return Response('Bad request', 400)
 
@@ -89,20 +90,20 @@ def find():
         if type(res) == dict:
             return Response('Bad request', 400)
         else:
-            return Response(res, 200, mimetype='application/json')
+            return Response(json.dumps(res), 200, mimetype='application/json')
     elif type_search == 'performer':
         res = controller_site.finder_by_word_from_performer(word)
         if type(res) == dict:
             return Response('Bad request', 400)
         else:
-            return Response(res, 200, mimetype='application/json')
+            return Response(json.dumps(res), 200, mimetype='application/json')
     elif type_search == 'song':
         res = controller_site.finder_by_word_from_song(word)
         print(res)
         if type(res) == dict:
             return Response('Bad request', 400)
         else:
-            return Response(res, 200, mimetype='application/json')
+            return Response(json.dumps(res), 200, mimetype='application/json')
 
 
 @app.route('/api/albums', methods=['GET'])
@@ -117,7 +118,20 @@ def performer_album():
     elif type(res) == dict:
         return Response('Server error', 404)
     else:
-        return Response(res, 200, mimetype='application/json')
+        return Response(json.dumps(res), 200, mimetype='application/json')
+
+
+@app.route('/api/album/songs', methods=['GET'])
+def songs_album():
+    user_token = request.headers.get('Authorization')
+    id_album = request.args.get('albumId')
+    if user_token not in ACTIVITY_USERS.keys():
+        return Response('Unauthorized', 401)
+    res = controller_site.show_songs_in_album(id_album)
+    if type(res) == dict:
+        return Response('Album not found', 404)
+    else:
+        return Response(json.dumps(res), 200, mimetype='application/json')
 
 
 @app.route('/api/playlists', methods=['POST'])

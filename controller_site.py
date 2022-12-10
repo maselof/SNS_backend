@@ -15,7 +15,7 @@ ACTIVITY_USERS = dict()
 def registration_users(data):
     try:
         with connection.cursor() as cursor:
-            if data['isPerformer']:
+            if data['performerIs']:
                 cursor.execute(
                     f"""
                     SELECT create_performer_user('{data['username']}', '{data['password']}', 
@@ -47,6 +47,7 @@ def registration_users(data):
     except Exception as ex:
         connection.rollback()
         print('[INFO]', ex)
+        print(type(ex))
         return dict(
             {
                 'error': f"{ex}"
@@ -59,12 +60,10 @@ def join_user(username, user_password):
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""
-                SELECT performer_users_relship.id_user FROM performer_users_relship
-                WHERE performer_users_relship.id_user =
-                (SELECT users.id_user FROM users WHERE users.username = '{username}');
+                SELECT id_performer FROM users WHERE username = '{username}'
                 """
             )
-            if cursor.fetchall() is not None:
+            if cursor.fetchone()[0] != -1:
                 isPerformer = True
             else:
                 isPerformer = False
@@ -78,7 +77,6 @@ def join_user(username, user_password):
             if username in ACTIVITY_USERS.values():
                 del ACTIVITY_USERS[list(ACTIVITY_USERS.keys())[list(ACTIVITY_USERS.values()).index(username)]]
             ACTIVITY_USERS[generate_token] = username
-            print(ACTIVITY_USERS)
             for data in cursor.fetchall():
                 res = {
                     'token': generate_token,
@@ -206,6 +204,7 @@ def show_performer_album(id_performer):
                     'albumName': data[1],
                     'performerId': data[2],
                     'songsCount': data[3],
+                    'coverUrl': data[4],
                     'performerName': data_performer[1],
                     'followers': data_performer[2]
                 })
@@ -277,18 +276,46 @@ def change_avatar_user(username):
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""
-                SELECT id_user FROM users WHERE users.username = f{username};
+                SELECT id_user FROM users WHERE users.username = '{username}';
                 """
             )
             id_user = cursor.fetchone()[0]
             cursor.execute(
                 f"""
-                UPDATE users SET users.avatarurl = 'data/{id_user}/img.png'
+                UPDATE users SET avatarurl = 'data/{id_user}/img.png'
                 """
             )
             return dict({
                 'successfully': id_user
             })
+    except Exception as ex:
+        print(ex)
+        return dict({
+            'error': ex
+        })
+
+
+def show_songs_in_album(id_album):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                SELECT * FROM show_song_by_id_album({id_album});
+                """
+            )
+            res = list()
+            for data in cursor.fetchall():
+                res.append({
+                    'songId': data[0],
+                    'songName': data[1],
+                    'albumId': data[2],
+                    'albumName': data[3],
+                    'performerId': data[4],
+                    'performerName': data[5],
+                    'audioUrl': data[6],
+                    'coverUrl': data[7]
+                })
+            return res
     except Exception as ex:
         print(ex)
         return dict({
