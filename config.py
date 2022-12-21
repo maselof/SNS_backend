@@ -1,6 +1,6 @@
 user = 'postgres'
 password = 'Defender02Sync02'
-host = 'localhost'
+host = 'database'
 port = '5432'
 database = 'DB_SNS'
 bff_host = 'http://bff:8080/'
