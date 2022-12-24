@@ -19,7 +19,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 def check_injections(req):
-    if re.match("\S[^\'\"|&;\(\)]*$", req):
+    if re.match("\S[^\'\"|&;[^\--]\(\)]*$", req) and not re.match("--", req):
         return False
     return True
 
